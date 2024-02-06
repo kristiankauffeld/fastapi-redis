@@ -4,6 +4,7 @@ import redis
 from rq import Queue, Worker, Connection
 import requests
 import time
+from rq.serializers import JSONSerializer
 
 logging.basicConfig(level=logging.INFO)
 
@@ -12,12 +13,12 @@ app = FastAPI(debug=True)
 #redis://default:redis@redis:6379/0
 
 # Establish a connection to Redis
-redis_db = redis.Redis(host="redis", port=6379, username="default", password="redis", db=0, decode_responses=True) #db=0
+redis_db = redis.Redis(host="redis", port=6379, username="default", password="redis", db=0) #db=0
 
 print(f"Ping successful: {redis_db.ping()}")
 
 # Create a queue
-task_queue = Queue(connection=redis_db)
+task_queue = Queue(connection=redis_db) #serializer=JSONSerializer()
 
 # Define the function to be executed by the worker
 def count_words_at_url(url):
@@ -30,6 +31,9 @@ job = task_queue.enqueue(count_words_at_url, 'http://nvie.com')
 
 print('Job id: %s' % job.id)
 print('----------------------------------------------------------------------')
+
+w = Worker(['default'], connection=redis_db)
+w.work()
 
 # Monitor job status using string values for status
 while job.get_status(refresh=True) not in ["finished", "failed"]:
@@ -45,3 +49,4 @@ elif job.get_status(refresh=True) == "failed":
 # Optionally, print the job result directly (if finished)
 # Note: This will be None if the job hasn't finished processing
 print('Job result:', job.result)
+
