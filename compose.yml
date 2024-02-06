@@ -24,9 +24,25 @@ services:
     environment:
       - REDIS_PASSWORD=redis
     command: ['redis-server', '--loglevel', 'verbose', '--requirepass', 'redis']
-    #healthcheck:
-    # test: ['CMD', 'redis-cli', '-a', 'redis', client list']
-    # interval: 10s
-    # timeout: 5s
-    # retries: 5
     restart: on-failure
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.rq-dashboard
+    container_name: rq-dashboard
+    ports:
+      - '9181:9181'
+    environment:
+      - RQ_DASHBOARD_REDIS_URL=redis://:redis@redis:6379
+    depends_on:
+      - redis
+
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    ports:
+      - '8001:8001'
+    volumes:
+      - redisinsight:/db
+volumes:
+  redisinsight: {}

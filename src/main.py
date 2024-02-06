@@ -1,23 +1,25 @@
 from fastapi import FastAPI
 import logging
 import redis
-from rq import Queue
+from rq import Queue, Worker, Connection
 import requests
 import time
-from rq.job import Job
 
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(debug=True)
 
-# Establish a connection to Redis
-r = redis.Redis(host="redis", port=6379, username="default", password="redis", decode_responses=True) #db=0
+#redis://default:redis@redis:6379/0
 
-print(f"Ping successful: {r.ping()}")
+# Establish a connection to Redis
+redis_db = redis.Redis(host="redis", port=6379, username="default", password="redis", db=0, decode_responses=True) #db=0
+
+print(f"Ping successful: {redis_db.ping()}")
 
 # Create a queue
-task_queue = Queue(connection=r)
+task_queue = Queue(connection=redis_db)
 
+# Define the function to be executed by the worker
 def count_words_at_url(url):
     """Just an example function that's called async."""
     resp = requests.get(url)
@@ -25,40 +27,21 @@ def count_words_at_url(url):
 
 # Enqueue a job
 job = task_queue.enqueue(count_words_at_url, 'http://nvie.com')
-#task_queue.enqueue(count_words_at_url, 'http://nvie.com')
 
 print('Job id: %s' % job.id)
-print('Status: %s' % job.get_status(refresh=True))
-print(job.return_value)
-#result = Job.fetch(id=job.id, connection=r)
+print('----------------------------------------------------------------------')
 
-#result.latest_result()  #  returns Result(id=uid, type=SUCCESSFUL)
+# Monitor job status using string values for status
+while job.get_status(refresh=True) not in ["finished", "failed"]:
+    print('Job %s is currently: %s' % (job.id, job.get_status(refresh=True)))
+    time.sleep(5)  # Sleep for a bit before checking the status again to avoid spamming
 
-#if result == result.Type.SUCCESSFUL: 
-#    print(result.return_value) 
-#else: 
-#    print(result.exc_string)
+# Once the loop is exited, check if the job is finished or failed
+if job.get_status(refresh=True) == "finished":
+    print('Job finished with result:', job.result)
+elif job.get_status(refresh=True) == "failed":
+    print('Job failed')
 
-
-#print(job.return_value)
-#result = job.latest_result() 
-
-#print(result.created_at)
-#print(result.type)
-
-#job = Job.fetch(id='my_id', connection=redis)
-#for result in job.results(): 
-#    print(result.created_at, result.type)
-
-#if result == result.Type.SUCCESSFUL: 
-#    print(result.return_value) 
-#else: 
-#    print(result.exc_string)
-
-#if status == "finished":
-#    print(job.return_value)
-
-#redis_url = 'redis://redis:6379'
-
-#redis://[[username]:[password]]@localhost:6379/0
-#r = redis.from_url(url="redis://default:admin@redis:6379/0")
+# Optionally, print the job result directly (if finished)
+# Note: This will be None if the job hasn't finished processing
+print('Job result:', job.result)

@@ -1,0 +1,4 @@
+FROM python:3.9-slim
+RUN pip install rq-dashboard
+EXPOSE 9181
+CMD ["rq-dashboard", "-b", "0.0.0.0"]
