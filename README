@@ -3,3 +3,11 @@ uvicorn src.main:app --reload
 docker compose up --build
 
 docker compose down
+
+run this command during the exec of the docker container:
+
+```bash
+redis-cli -a redis client list
+```
+
+for getting information about the clients connected to your Redis server.
