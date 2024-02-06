@@ -38,11 +38,14 @@ services:
     depends_on:
       - redis
 
-  redisinsight:
-    image: redislabs/redisinsight:latest
-    ports:
-      - '8001:8001'
-    volumes:
-      - redisinsight:/db
-volumes:
-  redisinsight: {}
+  rq-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: rq-worker
+    command: rq worker --url redis://default:redis@redis:6379/0 task_queue
+    #volumes:
+    #  - ./src:/app/src:z
+    depends_on:
+      - redis
+    restart: 'on-failure'
