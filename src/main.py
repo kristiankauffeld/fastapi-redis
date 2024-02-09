@@ -11,13 +11,14 @@ REDISPORT = os.getenv("REDISPORT")
 REDISUSER = os.getenv("REDISUSER")
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
 
+REDIS_PRIVATE_URL = os.getenv("REDIS_PRIVATE_URL")
+
 app = FastAPI(debug=True)
 
-#redis://default:redis@redis:6379/0
-
 # Establish a connection to Redis
-#redis_db = redis.Redis.from_url(os.environ['REDIS_PRIVATE_URL'])
-redis_db = redis.Redis(host=REDISHOST, port=REDISPORT, username=REDISUSER, password=REDIS_PASSWORD, db=0)
+redis_db = redis.from_url(REDIS_PRIVATE_URL + "?decode_responses=True&health_check_interval=2")
+
+#redis_db = redis.Redis(host=REDISHOST, port=REDISPORT, username=REDISUSER, password=REDIS_PASSWORD, db=0)
 
 print(f"Ping successful: {redis_db.ping()}")
 
