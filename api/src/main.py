@@ -7,12 +7,12 @@ from utils.jobs import count_words_at_url
 
 logging.basicConfig(level=logging.INFO)
 
-REDIS_PRIVATE_URL = os.getenv("REDIS_PRIVATE_URL")
+REDIS_URL = os.getenv("REDIS_URL")
 
 app = FastAPI(debug=True)
 
 # Establish a connection to Redis
-redis_conn = redis.from_url(REDIS_PRIVATE_URL)
+redis_conn = redis.from_url(REDIS_URL)
 print(f"Ping successful: {redis_conn.ping()}")
 
 # Create a queue

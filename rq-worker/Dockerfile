@@ -21,4 +21,4 @@ COPY . .
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 # Run the application.
-CMD rq worker --url $REDIS_PRIVATE_URL
+CMD rq worker --url $REDIS_URL
