@@ -12,7 +12,6 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Copy the source code into the container.
 COPY . .
 
 # Install Python dependencies

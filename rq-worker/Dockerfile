@@ -12,6 +12,8 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
+# Copy the current directory contents into the container
+# Copy the worker script and shared job definitions into the container
 # Copy the source code into the container.
 COPY . .
 
@@ -19,4 +21,4 @@ COPY . .
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 # Run the application.
-CMD uvicorn src.main:app --host 0.0.0.0 --port $PORT
+CMD rq worker --url $REDIS_URL
