@@ -12,11 +12,7 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Copy the current directory contents into the container
-COPY ./api /app/src
-COPY ./utils /app/utils
-
-COPY requirements.txt /app
+COPY . .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
