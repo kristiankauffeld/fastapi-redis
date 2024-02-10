@@ -14,10 +14,8 @@ WORKDIR /app
 
 # Copy the current directory contents into the container
 # Copy the worker script and shared job definitions into the container
-COPY ./rq-worker /app/worker    
-COPY ./utils /app/utils
-
-COPY requirements.txt /app
+# Copy the source code into the container.
+COPY . .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
